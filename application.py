@@ -7,7 +7,7 @@ from routers import health
 
 
 def create_app(db_engine=engine):
-    # models.Base.metadata.create_all(bind=db_engine)
+    models.Base.metadata.create_all(bind=db_engine)
     app = FastAPI()
     app.include_router(health.router, prefix="")
     # app.include_router(auth.router, prefix="/auth")
