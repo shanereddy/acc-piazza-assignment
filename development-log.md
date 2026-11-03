@@ -17,6 +17,21 @@ I have added an `active` column on the User table so that a user may be deactiva
 
 Sources: [CC Lab (class 4)](https://github.com/warestack/cc/tree/main/class-4)
 
+### 03/11/2026
+After drawing my database models on a piece of paper, I think I am ready to create the models for my new tables.
+I had to learn how to create related tables with SQLAlchemy.
+
+A few decisions I made:
+- Convert all models to use the Declarative Base Class because all documentation now uses this. It is difficult to read and understand the SQLAlchemy docs otherwise.
+- Post.body will be `Text` as it may be content of a large size
+- Use `func.now()` to get the current UTC time as the default for this function is naive of timezone
+
+Sources:
+- [Declarative Base](https://docs.sqlalchemy.org/en/21/orm/declarative_styles.html#orm-explicit-declarative-base)
+- [Declare Models](https://docs.sqlalchemy.org/en/21/orm/quickstart.html#declare-models)
+- [SQLAlchemy Datatypes](https://docs.sqlalchemy.org/en/21/core/type_basics.html)
+- [datetime usage](https://docs.python.org/3/library/datetime.html#examples-of-usage-datetime)
+
 ## TODO
 - [ ] Update packages to latest version
 - [ ] Update README with tech stack
