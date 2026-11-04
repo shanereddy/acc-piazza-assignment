@@ -32,6 +32,12 @@ Sources:
 - [SQLAlchemy Datatypes](https://docs.sqlalchemy.org/en/21/core/type_basics.html)
 - [datetime usage](https://docs.python.org/3/library/datetime.html#examples-of-usage-datetime)
 
+### 03/11/2026
+I've added all the other models, and all associations. I did all of the code by looking at the documentation for relationships. I still had errors as I couldn't get the back_populates correct for some reason. I used Claude to help me debug the errors and help with the back_populates settings on the models with associations.
+
+Sources:
+- [Association Object](https://docs.sqlalchemy.org/en/21/orm/basic_relationships.html#association-object)
+
 ## TODO
 - [ ] Update packages to latest version
 - [ ] Update README with tech stack
