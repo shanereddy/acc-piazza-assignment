@@ -6,6 +6,7 @@ from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 from datetime import datetime
 
 class Base(DeclarativeBase):
+    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, insert_default=func.now())
     pass
 
 class User(Base):
@@ -36,7 +37,6 @@ class Post(Base):
     body: Mapped[str] = mapped_column(Text, nullable=False)
     status: Mapped[str] = mapped_column(String(30), nullable=False, default="Live") # New posts are created as Live
     expires_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
-    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, insert_default=func.now())
     
     # A post belongs to a user
     user: Mapped["User"] = relationship(back_populates="posts")
