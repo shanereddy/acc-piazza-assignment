@@ -1,5 +1,7 @@
-from pydantic import BaseModel, ConfigDict, EmailStr, Field
+from pydantic import BaseModel, ConfigDict, EmailStr, Field, FutureDatetime
+from typing import List, Literal
 
+VALID_TOPICS = Literal["Politics", "Health", "Sport", "Tech"]
 
 # User
 class UserCreate(BaseModel):
@@ -23,3 +25,11 @@ class UserResponse(BaseModel):
 class TokenResponse(BaseModel):
     access_token: str
     token_type: str
+    
+# Post
+class PostCreate(BaseModel):
+    title: str = Field(max_length=30)
+    body: str
+    # Check against our list of topics and always require at least 1 topic
+    topics: List[VALID_TOPICS] = Field(min_length=1)
+    expires_at: FutureDatetime

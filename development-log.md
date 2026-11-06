@@ -38,6 +38,14 @@ I've added all the other models, and all associations. I did all of the code by 
 Sources:
 - [Association Object](https://docs.sqlalchemy.org/en/21/orm/basic_relationships.html#association-object)
 
+### 06/11/2026
+- After some time of trial, error and research, I realise that the validation should occur on the type, so my topics now uses a `Literal` list of topics and I check that the list is not empty.
+- I will be using the `FutureDatetime` type from `datetime` for expires_at in my schema as per Pydantic docs.
+- I've moved `created_at` to the `Base` class of my model so every table will get this field created.
+
+Sources:
+- [datetime Type docs](https://pydantic.dev/docs/validation/2.0/usage/types/datetime/)
+
 ## TODO
 - [ ] Update packages to latest version
 - [ ] Update README with tech stack
