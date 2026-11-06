@@ -42,6 +42,7 @@ Sources:
 - After some time of trial, error and research, I realise that the validation should occur on the type, so my topics now uses a `Literal` list of topics and I check that the list is not empty.
 - I will be using the `FutureDatetime` type from `datetime` for expires_at in my schema as per Pydantic docs.
 - I've moved `created_at` to the `Base` class of my model so every table will get this field created.
+- Added a seed function to seed topics into the db if they don't exist
 
 Sources:
 - [datetime Type docs](https://pydantic.dev/docs/validation/2.0/usage/types/datetime/)

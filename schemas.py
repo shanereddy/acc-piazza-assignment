@@ -1,7 +1,9 @@
 from pydantic import BaseModel, ConfigDict, EmailStr, Field, FutureDatetime
 from typing import List, Literal
 
-VALID_TOPICS = Literal["Politics", "Health", "Sport", "Tech"]
+
+TOPICS = ["Politics", "Health", "Sport", "Tech"]
+VALID_TOPICS = Literal[TOPICS]
 
 # User
 class UserCreate(BaseModel):
