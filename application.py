@@ -2,7 +2,7 @@ from fastapi import FastAPI
 
 import models
 from database import engine, SessionLocal
-from routers import health, auth
+from routers import health, auth, post
 from schemas import TOPICS
 
 
@@ -11,8 +11,10 @@ def create_app(db_engine=engine):
     seed_db()
     
     app = FastAPI()
+    
     app.include_router(health.router, prefix="")
     app.include_router(auth.router, prefix="/auth")
+    app.include_router(post.router, prefix="/posts")
 
     return app
 

@@ -47,8 +47,13 @@ Sources:
 Sources:
 - [datetime Type docs](https://pydantic.dev/docs/validation/2.0/usage/types/datetime/)
 
+### 07/11/2026
+- Returning the topics in a post response returns a Topic object. This needs to change to just the topic names.
+- Removed status from Post as this will be calculated on demand and not saved to the database
+
 ## TODO
 - [ ] Update packages to latest version
 - [ ] Update README with tech stack
 - [ ] Remove placeholder files
 - [ ] Update records in tests to assert deactivated user
+- [ ] Return topic names instead of topic objects in the PostResponse

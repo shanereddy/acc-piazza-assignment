@@ -1,9 +1,10 @@
 from pydantic import BaseModel, ConfigDict, EmailStr, Field, FutureDatetime
-from typing import List, Literal
+from typing import Literal
+from datetime import datetime
 
 
 TOPICS = ["Politics", "Health", "Sport", "Tech"]
-VALID_TOPICS = Literal[TOPICS]
+VALID_TOPICS = Literal[tuple(TOPICS)] # tuple is needed so the docs pick up the list
 
 # User
 class UserCreate(BaseModel):
@@ -33,5 +34,19 @@ class PostCreate(BaseModel):
     title: str = Field(max_length=30)
     body: str
     # Check against our list of topics and always require at least 1 topic
-    topics: List[VALID_TOPICS] = Field(min_length=1)
+    topics: set[VALID_TOPICS] = Field(min_length=1)
     expires_at: FutureDatetime
+    
+class Topic(BaseModel):
+    name: str
+    
+    model_config = ConfigDict(from_attributes=True)
+    
+class PostResponse(BaseModel):
+    id: int
+    title: str
+    body: str
+    topics: list[Topic]
+    expires_at: datetime
+    
+    model_config = ConfigDict(from_attributes=True)

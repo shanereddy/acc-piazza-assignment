@@ -35,7 +35,7 @@ class Post(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
     title: Mapped[str] = mapped_column(String(30), nullable=False)
     body: Mapped[str] = mapped_column(Text, nullable=False)
-    status: Mapped[str] = mapped_column(String(30), nullable=False, default="Live") # New posts are created as Live
+    # status: Mapped[str] = mapped_column(String(30), nullable=False, default="Live") # New posts are created as Live
     expires_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
     
     # A post belongs to a user
