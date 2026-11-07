@@ -5,6 +5,7 @@ from datetime import datetime
 
 TOPICS = ["Politics", "Health", "Sport", "Tech"]
 VALID_TOPICS = Literal[tuple(TOPICS)] # tuple is needed so the docs pick up the list
+POST_STATUSES = Literal["Live", "Expired"]
 
 # User
 class UserCreate(BaseModel):
@@ -50,3 +51,8 @@ class PostResponse(BaseModel):
     expires_at: datetime
     
     model_config = ConfigDict(from_attributes=True)
+    
+class PostQuery(BaseModel):
+    # Both are optional parameters
+    topic: VALID_TOPICS | None = None
+    status: POST_STATUSES | None = None

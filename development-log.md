@@ -50,6 +50,11 @@ Sources:
 ### 07/11/2026
 - Returning the topics in a post response returns a Topic object. This needs to change to just the topic names.
 - Removed status from Post as this will be calculated on demand and not saved to the database
+- Looked at the FastAPI docs to see how optional parameters are declared
+- Implemented the get posts endpoint, I want to refactor and create helper methods with the expired posts check
+
+Sources:
+- [Optional Parameters](https://fastapi.tiangolo.com/tutorial/query-params/#optional-parameters)
 
 ## TODO
 - [ ] Update packages to latest version
