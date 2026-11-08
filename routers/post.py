@@ -58,3 +58,12 @@ def get_posts(posts_query: Annotated[schemas.PostQuery, Query()], db: Session = 
             posts = posts.filter(datetime.now() >= models.Post.expires_at)
             
     return posts.all()
+
+@router.get("/{post_id}", response_model=schemas.PostResponse)
+def get_post(post_id: int, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
+    post = db.query(models.Post).filter(models.Post.id == post_id)
+    
+    if post is None:
+        raise HTTPException(status_code=404, detail="Post not found")
+    
+    return post
