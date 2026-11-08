@@ -2,7 +2,7 @@ from __future__ import annotations
 from typing import List
 
 from sqlalchemy import Column, Integer, String, Boolean, Text, DateTime, ForeignKey, func, Table, UniqueConstraint
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship, column_property
 from datetime import datetime
 
 class Base(DeclarativeBase):
@@ -45,6 +45,14 @@ class Post(Base):
     # has many
     comments: Mapped[List["Comment"]] = relationship(back_populates="post")
     topics: Mapped[List["Topic"]] = relationship(secondary="post_topics", back_populates="posts")
+    reactions: Mapped[List["UserPostReaction"]] = relationship()
+    
+    # def likes(self):
+    #     count = 0
+    #     for reaction in self.reactions:
+    #         if reaction.reaction == "like":
+    #             count += 1
+    #     return count
     
 class Topic(Base):
     __tablename__ = "topics"

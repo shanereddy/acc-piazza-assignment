@@ -56,6 +56,10 @@ Sources:
 Sources:
 - [Optional Parameters](https://fastapi.tiangolo.com/tutorial/query-params/#optional-parameters)
 
+### 08/11/2026
+- Added reactions endpoint. It looks complex but I will refactor it
+- I'm trying to figur eout how I reflect likes and dislikes in my PostResponse. Still undecided.
+
 ## TODO
 - [ ] Update packages to latest version
 - [ ] Update README with tech stack

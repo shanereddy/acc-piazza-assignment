@@ -1,11 +1,13 @@
 from pydantic import BaseModel, ConfigDict, EmailStr, Field, FutureDatetime
 from typing import Literal
 from datetime import datetime
+from enum import Enum
 
 
 TOPICS = ["Politics", "Health", "Sport", "Tech"]
 VALID_TOPICS = Literal[tuple(TOPICS)] # tuple is needed so the docs pick up the list
 POST_STATUSES = Literal["Live", "Expired"]
+POST_REACTION = Literal["like", "dislike"]
 
 # User
 class UserCreate(BaseModel):
@@ -42,17 +44,26 @@ class Topic(BaseModel):
     name: str
     
     model_config = ConfigDict(from_attributes=True)
-    
+
+
+class CommentsResponse(BaseModel):
+    body: str
+    user: str   
 class PostResponse(BaseModel):
     id: int
     title: str
     body: str
     topics: list[Topic]
     expires_at: datetime
+    comments: list[CommentsResponse]
+    # likes: int
     
     model_config = ConfigDict(from_attributes=True)
-    
+
 class PostQuery(BaseModel):
     # Both are optional parameters
     topic: VALID_TOPICS | None = None
     status: POST_STATUSES | None = None
+    
+class PostReaction(BaseModel):
+    value: POST_REACTION

@@ -61,9 +61,49 @@ def get_posts(posts_query: Annotated[schemas.PostQuery, Query()], db: Session = 
 
 @router.get("/{post_id}", response_model=schemas.PostResponse)
 def get_post(post_id: int, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
-    post = db.query(models.Post).filter(models.Post.id == post_id)
+    post = db.query(models.Post).filter(models.Post.id == post_id).first()
     
     if post is None:
         raise HTTPException(status_code=404, detail="Post not found")
     
+    return post
+
+@router.put("/{post_id}/reaction", response_model=schemas.PostResponse, status_code=200)
+def react_to_post(post_id: int, reaction: schemas.PostReaction, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
+    post = (db.query(models.Post)
+        .filter(models.Post.id == post_id)
+        .first()
+        )
+    
+    if post is None:
+        raise HTTPException(status_code=404, detail="Post not found")
+
+    # Did the user author the post?
+    if post.user_id == current_user.id:
+        raise HTTPException(status_code=403, detail="You cannot react to your own post")
+    
+    existing_reaction = (
+        db.query(models.UserPostReaction)
+        .filter(models.UserPostReaction.post_id == post.id)
+        .filter(models.UserPostReaction.user_id == current_user.id)
+        .first()
+    )
+    
+    # Does a reaction exist for this user and post?
+    if existing_reaction is not None:
+        # Is the new reaction different from the existing reaction?
+        if existing_reaction.reaction != reaction.value:
+            existing_reaction.reaction = reaction.value
+            db.add(existing_reaction)
+    # Create a new reaction
+    else:
+        new_reaction = models.UserPostReaction(
+            post_id= post.id,
+            user_id= current_user.id,
+            reaction= reaction.value
+        )
+        db.add(new_reaction)
+
+    db.commit()     
+    db.refresh(post)
     return post
