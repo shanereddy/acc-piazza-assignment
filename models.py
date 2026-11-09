@@ -1,7 +1,7 @@
 from __future__ import annotations
 from typing import List
 
-from sqlalchemy import Column, Integer, String, Boolean, Text, DateTime, ForeignKey, func, Table, UniqueConstraint
+from sqlalchemy import Column, Integer, String, Boolean, Text, DateTime, ForeignKey, func, Table, UniqueConstraint, select
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship, column_property
 from datetime import datetime
 
@@ -29,14 +29,47 @@ post_topics = Table(
     Column("topic_id", ForeignKey("topics.id"), primary_key=True)
 )
     
+# Association pattern from SQLAlchemy because we have an addition field "reaction"   
+class UserPostReaction(Base):
+    __tablename__ = "user_post_reactions"
+    __table_args__ = (UniqueConstraint("user_id", "post_id"),)
+    
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
+    post_id: Mapped[int] = mapped_column(ForeignKey("posts.id"), index=True)
+    reaction: Mapped[str] = mapped_column(String, nullable=False)
+    
 class Post(Base):
     __tablename__ = "posts"
     
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
     title: Mapped[str] = mapped_column(String(30), nullable=False)
     body: Mapped[str] = mapped_column(Text, nullable=False)
-    # status: Mapped[str] = mapped_column(String(30), nullable=False, default="Live") # New posts are created as Live
     expires_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    
+    # Derived columns
+    likes = column_property(
+        select(func.count(UserPostReaction.id))
+        .where(UserPostReaction.post_id == id)
+        .where(UserPostReaction.reaction == "like")
+        .correlate_except(UserPostReaction)
+        .scalar_subquery()
+    )
+    
+    dislikes = column_property(
+        select(func.count(UserPostReaction.id))
+        .where(UserPostReaction.post_id == id)
+        .where(UserPostReaction.reaction == "dislike")
+        .correlate_except(UserPostReaction)
+        .scalar_subquery()
+    )
+    
+    reactions_count = column_property(
+        select(func.count(UserPostReaction.id))
+        .where(UserPostReaction.post_id == id)
+        .correlate_except(UserPostReaction)
+        .scalar_subquery()
+    )
     
     # A post belongs to a user
     user: Mapped["User"] = relationship(back_populates="posts")
@@ -75,13 +108,3 @@ class Comment(Base):
     
     post: Mapped["Post"] = relationship(back_populates="comments")
     post_id: Mapped[int] = mapped_column(ForeignKey("posts.id"))
-
-# Association pattern from SQLAlchemy because we have an addition field "reaction"   
-class UserPostReaction(Base):
-    __tablename__ = "user_post_reactions"
-    __table_args__ = (UniqueConstraint("user_id", "post_id"),)
-    
-    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
-    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
-    post_id: Mapped[int] = mapped_column(ForeignKey("posts.id"), index=True)
-    reaction: Mapped[str] = mapped_column(String, nullable=False)

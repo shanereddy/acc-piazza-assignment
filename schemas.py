@@ -55,8 +55,9 @@ class PostResponse(BaseModel):
     body: str
     topics: list[Topic]
     expires_at: datetime
+    likes: int
+    dislikes: int
     comments: list[CommentsResponse]
-    # likes: int
     
     model_config = ConfigDict(from_attributes=True)
 

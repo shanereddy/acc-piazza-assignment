@@ -60,6 +60,13 @@ Sources:
 - Added reactions endpoint. It looks complex but I will refactor it
 - I'm trying to figur eout how I reflect likes and dislikes in my PostResponse. Still undecided.
 
+### 09/11/2026
+- The likes and dislikes are derived from the `UserPostReaction` class and I have added a column_property to count the likes and dislikes and store it as a derived column
+- I have also added a reactions_count column property for use in the Most-active post query.
+
+Sources:
+- [Using Column Property](https://docs.sqlalchemy.org/en/14/orm/mapped_sql_expr.html#using-column-property)
+
 ## TODO
 - [ ] Update packages to latest version
 - [ ] Update README with tech stack
