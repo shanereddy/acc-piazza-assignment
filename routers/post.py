@@ -107,3 +107,24 @@ def react_to_post(post_id: int, reaction: schemas.PostReaction, db: Session = De
     db.commit()     
     db.refresh(post)
     return post
+
+@router.post("/{post_id}/comments", response_model=schemas.CommentResponse, status_code=201)
+def create_comment(post_id: int, comment: schemas.CommentCreate, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
+    post = (db.query(models.Post)
+        .filter(models.Post.id == post_id)
+        .first()
+        )
+    
+    if post is None:
+        raise HTTPException(status_code=404, detail="Post not found")
+    
+    new_comment = models.Comment(
+        post_id= post_id,
+        user_id= current_user.id,
+        body= comment.body
+    )
+    
+    db.add(new_comment)
+    db.commit()
+    db.refresh(new_comment)
+    return new_comment

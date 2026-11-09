@@ -45,10 +45,6 @@ class Topic(BaseModel):
     
     model_config = ConfigDict(from_attributes=True)
 
-
-class CommentsResponse(BaseModel):
-    body: str
-    user: str   
 class PostResponse(BaseModel):
     id: int
     title: str
@@ -57,7 +53,7 @@ class PostResponse(BaseModel):
     expires_at: datetime
     likes: int
     dislikes: int
-    comments: list[CommentsResponse]
+    comments: list[CommentResponse]
     
     model_config = ConfigDict(from_attributes=True)
 
@@ -68,3 +64,13 @@ class PostQuery(BaseModel):
     
 class PostReaction(BaseModel):
     value: POST_REACTION
+    
+class CommentCreate(BaseModel):
+    body: str
+    
+class CommentResponse(BaseModel):
+    id: int
+    post_id: int
+    body: str
+    user_id: int
+    created_at: datetime
