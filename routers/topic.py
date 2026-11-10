@@ -14,7 +14,7 @@ from security import get_current_user
 router = APIRouter()
 
 @router.get("/{topic}/most-active", response_model=list[schemas.PostResponse])
-def get_post(topic: Annotated[str, Literal[tuple(schemas.TOPICS)]], db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
+def get_post(topic: Annotated[str, schemas.ValidTopics], db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
     post = (
         db.query(models.Post)
         .options(joinedload(models.Post.topics)) # all topics

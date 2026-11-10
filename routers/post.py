@@ -52,7 +52,7 @@ def get_posts(posts_query: Annotated[schemas.PostQuery, Query()], db: Session = 
         posts = posts.filter(models.Post.topics.any(models.Topic.name == posts_query.topic))
         
     if posts_query.status is not None:
-        if posts_query.status == "Live":
+        if posts_query.status == schemas.PostStatus.Live:
             posts = posts.filter(datetime.now() < models.Post.expires_at)
         else:
             posts = posts.filter(datetime.now() >= models.Post.expires_at)

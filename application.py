@@ -3,7 +3,7 @@ from fastapi import FastAPI
 import models
 from database import engine, SessionLocal
 from routers import health, auth, post, topic
-from schemas import TOPICS
+from schemas import ValidTopics
 
 
 def create_app(db_engine=engine):
@@ -25,15 +25,15 @@ def seed_db():
     
     try:
         # seed topics
-        for topic_name in TOPICS:
+        for topic in ValidTopics:
             existing_topic = (
                 db.query(models.Topic)
-                .filter(models.Topic.name == topic_name)
+                .filter(models.Topic.name == topic.value)
                 .first()
             )
             
             if existing_topic is None:
-                db.add(models.Topic(name= topic_name))
+                db.add(models.Topic(name= topic.value))
                 
         db.commit()
     finally:

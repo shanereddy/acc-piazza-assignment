@@ -70,10 +70,12 @@ Sources:
 ### 10/11/2026
 - I did deep research so I could execute the SQL query for the most-active posts based on topic. I researched joins, order_by (for descending as well) and joins using relationships.
 - I also set `echo=True` on my database connection so I could view the SQL executed, so I can verify it manually.
+- Using Enums for List of String validations as per FastAPI tutorial
 
 Sources:
 - [Joined Load](https://docs.sqlalchemy.org/en/14/tutorial/orm_related_objects.html#joined-load)
 - [Stackoverflow - Using order_by desc in SqlAlchemy](https://stackoverflow.com/questions/4186062/sqlalchemy-order-by-descending)
+- [Predefined Values](https://fastapi.tiangolo.com/tutorial/path-params/?h=enum#predefined-values)
 
 ## TODO
 - [ ] Update packages to latest version
