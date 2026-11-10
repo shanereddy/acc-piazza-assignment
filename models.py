@@ -80,13 +80,6 @@ class Post(Base):
     topics: Mapped[List["Topic"]] = relationship(secondary="post_topics", back_populates="posts")
     reactions: Mapped[List["UserPostReaction"]] = relationship()
     
-    # def likes(self):
-    #     count = 0
-    #     for reaction in self.reactions:
-    #         if reaction.reaction == "like":
-    #             count += 1
-    #     return count
-    
 class Topic(Base):
     __tablename__ = "topics"
     
