@@ -77,6 +77,13 @@ Sources:
 - [Stackoverflow - Using order_by desc in SqlAlchemy](https://stackoverflow.com/questions/4186062/sqlalchemy-order-by-descending)
 - [Predefined Values](https://fastapi.tiangolo.com/tutorial/path-params/?h=enum#predefined-values)
 
+### 11/11/2026
+- Added computed field for Post status in the Pydantic model
+- Converting business logic to rules in a dedicated file
+
+Sources:
+- [The computed_field decorator](https://pydantic.dev/docs/validation/latest/concepts/fields/#the-computed_field-decorator)
+
 ## TODO
 - [ ] Update packages to latest version
 - [ ] Update README with tech stack

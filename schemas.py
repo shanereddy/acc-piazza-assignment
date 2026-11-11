@@ -1,13 +1,8 @@
-from pydantic import BaseModel, ConfigDict, EmailStr, Field, FutureDatetime
+from pydantic import BaseModel, ConfigDict, EmailStr, Field, FutureDatetime, computed_field
 from typing import Literal
 from datetime import datetime
 from enum import Enum
-
-
-# TOPICS = ["Politics", "Health", "Sport", "Tech"]
-# VALID_TOPICS = Literal[tuple(TOPICS)] # tuple is needed so the docs pick up the list
-# POST_STATUSES = Literal["Live", "Expired"]
-# POST_REACTION = Literal["like", "dislike"]
+from rules import is_post_live
 
 class ValidTopics(str, Enum):
     Politics = "Politics"
@@ -48,9 +43,9 @@ class TokenResponse(BaseModel):
     
 # Post
 class PostCreate(BaseModel):
-    title: str = Field(max_length=30)
-    body: str
-    # Check against our list of topics and always require at least 1 topic
+    title: str = Field(max_length=30, strip_whitespace=True)
+    body: str = Field(strip_whitespace=True)
+    # Check against our topics and always require at least 1 topic
     topics: set[ValidTopics] = Field(min_length=1)
     expires_at: FutureDatetime
     
@@ -69,6 +64,14 @@ class PostResponse(BaseModel):
     dislikes: int
     comments: list[CommentResponse]
     
+    @computed_field
+    @property
+    def status(self) -> str:
+        if is_post_live(datetime.now(), self.expires_at):
+            return PostStatus.Live
+        else:
+            return PostStatus.Expired
+    
     model_config = ConfigDict(from_attributes=True)
 
 class PostQuery(BaseModel):
@@ -80,11 +83,11 @@ class PostReaction(BaseModel):
     value: PostReaction
     
 class CommentCreate(BaseModel):
-    body: str
+    body: str = Field(strip_whitespace=True)
     
 class CommentResponse(BaseModel):
     id: int
     post_id: int
-    body: str
+    body: str = Field(strip_whitespace=True)
     user_id: int
     created_at: datetime
