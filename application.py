@@ -1,14 +1,15 @@
 from fastapi import FastAPI
 
 import models
-from database import engine, SessionLocal
+from database import engine
+from sqlalchemy.orm import Session
 from routers import health, auth, post, topic
 from schemas import ValidTopics
 
 
 def create_app(db_engine=engine):
     models.Base.metadata.create_all(bind=db_engine)
-    seed_db()
+    seed_db(db_engine)
     
     app = FastAPI()
     
@@ -20,22 +21,21 @@ def create_app(db_engine=engine):
     return app
 
 # Creates records if they do not exist
-def seed_db():
-    db = SessionLocal()
-    
-    try:
-        # seed topics
-        for topic in ValidTopics:
-            existing_topic = (
-                db.query(models.Topic)
-                .filter(models.Topic.name == topic.value)
-                .first()
-            )
-            
-            if existing_topic is None:
-                db.add(models.Topic(name= topic.value))
+def seed_db(db_engine):
+    with Session(db_engine) as db:
+        try:
+            # seed topics
+            for topic in ValidTopics:
+                existing_topic = (
+                    db.query(models.Topic)
+                    .filter(models.Topic.name == topic.value)
+                    .first()
+                )
                 
-        db.commit()
-    finally:
-        db.close()
+                if existing_topic is None:
+                    db.add(models.Topic(name= topic.value))
+                    
+            db.commit()
+        finally:
+            db.close()
     

@@ -10,6 +10,7 @@ from sqlalchemy.orm import sessionmaker
 from application import create_app
 from database import get_db
 
+USER = {"username": "somesuer123", "email": "someuser@example.com", "password": "secret123"}
 
 @pytest.fixture
 def client(tmp_path):
@@ -31,3 +32,11 @@ def client(tmp_path):
     finally:
         app.dependency_overrides.clear()
         engine.dispose()
+        
+@pytest.fixture
+def auth_client(client):
+    client.post("/auth/register", json=USER)
+    response = client.post("/auth/login", json=USER)
+    token = response.json()["access_token"]
+    client.headers["Authorization"] = f"Bearer {token}"
+    return client

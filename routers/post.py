@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from typing import Annotated
 from fastapi import Query
 
-from datetime import datetime
+from datetime import datetime, timezone
 import models
 import schemas
 from database import get_db
@@ -54,9 +54,9 @@ def get_posts(posts_query: Annotated[schemas.PostQuery, Query()], db: Session = 
         
     if posts_query.status is not None:
         if posts_query.status == schemas.PostStatus.Live:
-            posts = posts.filter(datetime.now() < models.Post.expires_at)
+            posts = posts.filter(datetime.now(timezone.utc) < models.Post.expires_at)
         else:
-            posts = posts.filter(datetime.now() >= models.Post.expires_at)
+            posts = posts.filter(datetime.now(timezone.utc) >= models.Post.expires_at)
             
     return posts.all()
 

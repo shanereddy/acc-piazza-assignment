@@ -1,6 +1,6 @@
 from pydantic import BaseModel, ConfigDict, EmailStr, Field, FutureDatetime, computed_field
 from typing import Literal
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import StrEnum
 from rules import is_post_live
 
