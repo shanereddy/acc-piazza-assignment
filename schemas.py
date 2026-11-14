@@ -43,8 +43,8 @@ class TokenResponse(BaseModel):
     
 # Post
 class PostCreate(BaseModel):
-    title: str = Field(max_length=30, strip_whitespace=True)
-    body: str = Field(strip_whitespace=True)
+    title: str = Field(max_length=30, json_schema_extra={"strip_whitespace": True})
+    body: str = Field(json_schema_extra={"strip_whitespace": True})
     # Check against our topics and always require at least 1 topic
     topics: set[ValidTopics] = Field(min_length=1)
     expires_at: FutureDatetime
@@ -83,11 +83,11 @@ class PostReaction(BaseModel):
     value: PostReaction
     
 class CommentCreate(BaseModel):
-    body: str = Field(strip_whitespace=True)
+    body: str = Field(json_schema_extra={"strip_whitespace": True})
     
 class CommentResponse(BaseModel):
     id: int
     post_id: int
-    body: str = Field(strip_whitespace=True)
+    body: str = Field(json_schema_extra={"strip_whitespace": True})
     user_id: int
     created_at: datetime
