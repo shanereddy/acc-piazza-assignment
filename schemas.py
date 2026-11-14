@@ -1,20 +1,20 @@
 from pydantic import BaseModel, ConfigDict, EmailStr, Field, FutureDatetime, computed_field
 from typing import Literal
 from datetime import datetime
-from enum import Enum
+from enum import StrEnum
 from rules import is_post_live
 
-class ValidTopics(str, Enum):
+class ValidTopics(StrEnum):
     Politics = "Politics"
     Health = "Health"
     Sport = "Sport"
     Tech = "Tech"
     
-class PostStatus(str, Enum):
+class PostStatus(StrEnum):
     Live = "Live"
     Expired = "Expired"
     
-class PostReaction(str, Enum):
+class PostReaction(StrEnum):
     like = "like"
     dislike = "dislike"
 
@@ -58,7 +58,7 @@ class PostResponse(BaseModel):
     id: int
     title: str
     body: str
-    topics: list[ValidTopics]
+    topics: list[Topic]
     expires_at: datetime
     likes: int
     dislikes: int
