@@ -9,7 +9,7 @@ import models
 import schemas
 from database import get_db
 from security import get_current_user
-from rules import is_post_live
+from rules import is_post_live, user_is_author, user_wants_different_reaction
 
 router = APIRouter()
 
@@ -22,7 +22,7 @@ def create_post(post: schemas.PostCreate, db: Session = Depends(get_db), current
         expires_at=post.expires_at
     )
     
-    # associate the user
+    # Set the author of the post
     new_post.user = current_user
     
     for topic in post.topics:
@@ -79,8 +79,7 @@ def react_to_post(post_id: int, reaction: schemas.PostReaction, db: Session = De
     if post is None:
         raise HTTPException(status_code=404, detail="Post not found")
 
-    # Did the user author the post?
-    if post.user_id == current_user.id:
+    if user_is_author(post.user_id, current_user.id):
         raise HTTPException(status_code=403, detail="You cannot react to your own post")
     
     existing_reaction = (
@@ -93,7 +92,7 @@ def react_to_post(post_id: int, reaction: schemas.PostReaction, db: Session = De
     # Does a reaction exist for this user and post?
     if existing_reaction is not None:
         # Is the new reaction different from the existing reaction?
-        if existing_reaction.reaction != reaction.value:
+        if user_wants_different_reaction(existing_reaction.reaction, reaction.value):
             existing_reaction.reaction = reaction.value
             db.add(existing_reaction)
     # Create a new reaction
