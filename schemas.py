@@ -63,6 +63,7 @@ class PostResponse(BaseModel):
     likes: int
     dislikes: int
     comments: list[CommentResponse]
+    user_id: int
     
     @computed_field
     @property

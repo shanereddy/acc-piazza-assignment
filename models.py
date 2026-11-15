@@ -72,7 +72,8 @@ class Post(Base):
     )
     
     # A post belongs to a user
-    user: Mapped["User"] = relationship(back_populates="posts")
+    # user: Mapped["User"] = relationship(back_populates="posts")
+    user: Mapped["User"] = relationship()
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
     
     # has many
