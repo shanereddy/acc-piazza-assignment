@@ -3,6 +3,7 @@ import os
 os.environ["JWT_SECRET"] = "test-only-secret-not-for-deployment-123456789"
 
 import pytest
+from datetime import datetime, timezone, timedelta
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -61,5 +62,21 @@ def auth_users(client):
         response = client.post("/auth/login", json=USERS[user])
         token = response.json()["access_token"]
         auth_users[user]["token"] = token
+    
+    return auth_users
+
+@pytest.fixture
+def auth_user_posts(client, auth_users):
+    expires_at = (datetime.now() + timedelta(10))
+    POST = {"title": "New Title for Post", "body": "This is a body of a post.", "topics": ["Tech"], "expires_at": expires_at.isoformat()}
+    
+    client.headers["Authorization"] = f"Bearer {auth_users["Olga"]["token"]}"
+    auth_users["Olga"]["post_id"] = client.post("/posts", json=POST).json()["id"]
+    
+    client.headers["Authorization"] = f"Bearer {auth_users["Nick"]["token"]}"
+    auth_users["Nick"]["post_id"] = client.post("/posts", json=POST).json()["id"]
+    
+    client.headers["Authorization"] = f"Bearer {auth_users["Mary"]["token"]}"
+    auth_users["Mary"]["post_id"] = client.post("/posts", json=POST).json()["id"]
     
     return auth_users

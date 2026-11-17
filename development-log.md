@@ -84,6 +84,12 @@ Sources:
 Sources:
 - [The computed_field decorator](https://pydantic.dev/docs/validation/latest/concepts/fields/#the-computed_field-decorator)
 
+### 17/11/2026
+- I used `@pytest.mark.usefixtures` to run fixtures that seed my database with posts, taken from the pytest documentation
+
+Sources:
+- [usefixtures](https://docs.pytest.org/en/stable/how-to/fixtures.html#usefixtures)
+
 ## TODO
 - [ ] Update packages to latest version
 - [ ] Update README with tech stack
