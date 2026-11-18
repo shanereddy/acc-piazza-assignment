@@ -90,6 +90,9 @@ Sources:
 Sources:
 - [usefixtures](https://docs.pytest.org/en/stable/how-to/fixtures.html#usefixtures)
 
+### 18/11/2026
+- I was trying to figure out a way to progressively build on my fixtures through each test. Without duplicating the requests. I settled on chaining the fixtures and calling the latest fixture for a given test. This seems to be working, although I may refactor once I finish all of the test cases.
+
 ## TODO
 - [ ] Update packages to latest version
 - [ ] Update README with tech stack

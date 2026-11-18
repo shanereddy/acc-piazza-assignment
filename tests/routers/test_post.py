@@ -4,6 +4,7 @@ from conftest import USERS
 
 expires_at = (datetime.now() + timedelta(10))
 POST = {"title": "New Title for Post", "body": "This is a body of a post.", "topics": ["Tech"], "expires_at": expires_at.isoformat()}
+COMMENT = {"body": "This is a comment from a user"}
 
 def test_route_unauthenticated(client):
     assert client.post("/posts", json=POST).status_code == 401
@@ -50,7 +51,7 @@ def test_create_tech_post_TC06(client, auth_users):
     assert body["user_id"] == auth_users["Mary"]["user_id"]
     
 # TC07
-@pytest.mark.usefixtures("auth_user_posts")
+@pytest.mark.usefixtures("user_posts")
 def test_get_posts_by_tech_topic_TC07(client):
     response = client.get("/posts?topic=Tech")
     assert response.status_code == 200
@@ -62,42 +63,61 @@ def test_get_posts_by_tech_topic_TC07(client):
         assert post["comments"] == []
 
 # TC08
-def test_likes_on_a_post_TC08(client, auth_user_posts):
-    mary_post_id = auth_user_posts["Mary"]["post_id"]
+def test_likes_on_a_post_TC08(client, post_likes):
+    mary_post_id = post_likes["Mary"]["post_id"]
     
-    # Nick likes Mary's post
-    client.headers["Authorization"] = f"Bearer {auth_user_posts["Nick"]["token"]}"
-    assert client.get(f"/posts/{mary_post_id}").json()["likes"] == 0
-    response = client.put(f"/posts/{mary_post_id}/reaction", json={"value": "like"})
-    assert response.status_code == 200
-    assert response.json()["id"] == mary_post_id
-    assert response.json()["likes"] == 1
-    
-    # Olga likes Mary's post
-    client.headers["Authorization"] = f"Bearer {auth_user_posts["Olga"]["token"]}"
-    response = client.put(f"/posts/{mary_post_id}/reaction", json={"value": "like"})
-    assert response.status_code == 200
-    assert response.json()["id"] == mary_post_id
-    assert response.json()["likes"] == 2
+    client.headers["Authorization"] = f"Bearer {post_likes["Nick"]["token"]}"
+    assert client.get(f"/posts/{mary_post_id}").json()["likes"] == 2
     
 # TC09
-def test_likes_and_dislikes_on_posts_TC09(client, auth_user_posts):
-    nicks_post_id = auth_user_posts["Nick"]["post_id"]
-    mary_post_id = auth_user_posts["Mary"]["post_id"]
-    client.headers["Authorization"] = f"Bearer {auth_user_posts["Nick"]["token"]}"
-    client.put(f"/posts/{mary_post_id}/reaction", json={"value": "like"})
-    client.headers["Authorization"] = f"Bearer {auth_user_posts["Olga"]["token"]}"
-    client.put(f"/posts/{mary_post_id}/reaction", json={"value": "like"})
+def test_likes_and_dislikes_on_posts_TC09(client, post_dislikes):
+    nicks_post_id = post_dislikes["Nick"]["post_id"]
+    mary_post_id = post_dislikes["Mary"]["post_id"]
     
-    client.headers["Authorization"] = f"Bearer {auth_user_posts["Nestor"]["token"]}"
-    response = client.put(f"/posts/{nicks_post_id}/reaction", json={"value": "like"})
-    assert response.status_code == 200
-    assert response.json()["likes"] == 1
-    response = client.put(f"/posts/{mary_post_id}/reaction", json={"value": "dislike"})
-    assert response.status_code == 200
-    assert response.json()["dislikes"] == 1
+    client.headers["Authorization"] = f"Bearer {post_dislikes["Nestor"]["token"]}"
+    assert client.get(f"/posts/{nicks_post_id}").json()["likes"] == 1
+    assert client.get(f"/posts/{mary_post_id}").json()["dislikes"] == 1
+
+# TC10
+def test_counts_of_posts_TC10(client, post_dislikes):
+    nicks_post_id = post_dislikes["Nick"]["post_id"]
+    mary_post_id = post_dislikes["Mary"]["post_id"]
+    client.headers["Authorization"] = f"Bearer {post_dislikes["Nestor"]["token"]}"
+    # Mary's posts
+    response = client.get(f"/posts/{mary_post_id}").json()
+    assert response["likes"] == 2
+    assert response["dislikes"] == 1
+    # Nick's post
+    response = client.get(f"/posts/{nicks_post_id}").json()
+    assert response["likes"] == 1
     
+# TC11
+def test_user_likes_own_post_TC11(client, post_dislikes):
+    mary_post_id = post_dislikes["Mary"]["post_id"]
+    client.headers["Authorization"] = f"Bearer {post_dislikes["Mary"]["token"]}"
+    response = client.put(f"/posts/{mary_post_id}/reaction", json={"value": "like"})
+    assert response.status_code == 403
     
+    response = client.get(f"/posts/{mary_post_id}").json()
+    assert response["likes"] == 2
+
+# TC12
+def test_users_add_comments_to_post_TC12(client, post_comments):
+    mary_post_id = post_comments["Mary"]["post_id"]
+    client.headers["Authorization"] = f"Bearer {post_comments["Mary"]["token"]}"
+    
+    response = client.get(f"/posts/{mary_post_id}").json()
+    assert len(response["comments"]) == 4
+
+# TC13
+# def test_browsing_reactions_and_comments_TC13(client, auth_user_posts_with_likes):
+
+
+
+
+
+
+
 
 # def test_route_authenticated(auth_client):
 #     create_post = auth_client.post("/posts", json=POST)
