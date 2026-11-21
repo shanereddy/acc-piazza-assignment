@@ -140,24 +140,33 @@ def test_create_a_health_post_TC14(client, post_comments):
     assert body["user_id"] == post_comments["Nestor"]["user_id"]
 
 # TC15
-def test_browse_health_posts_TC15(client, all_seeded_posts):
-    client.headers["Authorization"] = f"Bearer {all_seeded_posts["Olga"]["token"]}"
+def test_browse_health_posts_TC15(client, seeded_posts_plus_health):
+    client.headers["Authorization"] = f"Bearer {seeded_posts_plus_health["Olga"]["token"]}"
     response = client.get("/posts?topic=Health")
     assert response.status_code == 200
     posts = response.json()
     assert len(posts) == 1
-    assert posts[0]["id"] == all_seeded_posts["Nestor"]["health_post_id"]
+    assert posts[0]["id"] == seeded_posts_plus_health["Nestor"]["health_post_id"]
 
 # TC16
-def test_comment_on_live_health_post_TC16(client, all_seeded_posts):
-    nestors_health_post_id = all_seeded_posts["Nestor"]["health_post_id"]
-    client.headers["Authorization"] = f"Bearer {all_seeded_posts["Mary"]["token"]}"
+def test_comment_on_live_health_post_TC16(client, seeded_posts_plus_health):
+    nestors_health_post_id = seeded_posts_plus_health["Nestor"]["health_post_id"]
+    client.headers["Authorization"] = f"Bearer {seeded_posts_plus_health["Mary"]["token"]}"
     response = client.post(f"/posts/{nestors_health_post_id}/comments", json=COMMENT)
     assert response.status_code == 201
     body = response.json()
     assert isinstance(body["id"], int)
-    assert body["user_id"] == all_seeded_posts["Mary"]["user_id"]
+    assert body["user_id"] == seeded_posts_plus_health["Mary"]["user_id"]
 
+# TC17
+def test_reaction_on_expired_post_TC17(client, fake_clock, all_seeded_posts):
+    nestors_health_post_id = all_seeded_posts["Nestor"]["health_post_id"]
+    client.headers["Authorization"] = f"Bearer {all_seeded_posts["Mary"]["token"]}"
+    
+    fake_clock.change_now(fake_clock.now + timedelta(minutes=20))
+    response = client.put(f"/posts/{nestors_health_post_id}/reaction", json={"value": "like"})
+    assert response.status_code == 403
+    assert client.get(f"/posts/{nestors_health_post_id}").json()["likes"] == 0
 
 # def test_route_authenticated(auth_client):
 #     create_post = auth_client.post("/posts", json=POST)

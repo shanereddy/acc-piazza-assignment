@@ -93,6 +93,16 @@ Sources:
 ### 18/11/2026
 - I was trying to figure out a way to progressively build on my fixtures through each test. Without duplicating the requests. I settled on chaining the fixtures and calling the latest fixture for a given test. This seems to be working, although I may refactor once I finish all of the test cases.
 
+### 21/11/2026
+- Getting a fake clock set up was challenging. I used the same model of `dependency_overrides` in the client fixture to accomplish this.
+I made the production code rely on an imported `utc_now()` function that returned the current UTC datetime. Then used dependency injection to inject a `FakeClock` class that has a change_now function to change the current time.
+- I had to learn Python class creation syntax
+- I eventualy had to use AI to debug it as my function calls were not written properly. This was a monir fix and it worked after that.
+
+Sources:
+- [Python OOP](https://www.w3schools.com/python/python_oop.asp)
+- [Testing Dependencies](https://fastapi.tiangolo.com/advanced/testing-dependencies/#use-the-app-dependency-overrides-attribute)
+
 ## TODO
 - [ ] Update packages to latest version
 - [ ] Update README with tech stack

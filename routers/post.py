@@ -10,6 +10,7 @@ import schemas
 from database import get_db
 from security import get_current_user
 from rules import is_post_live, user_is_author, user_wants_different_reaction
+from clock import utc_now
 
 router = APIRouter()
 
@@ -46,7 +47,7 @@ def create_post(post: schemas.PostCreate, db: Session = Depends(get_db), current
     return new_post
 
 @router.get("/", response_model=list[schemas.PostResponse])
-def get_posts(posts_query: Annotated[schemas.PostQuery, Query()], db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
+def get_posts(posts_query: Annotated[schemas.PostQuery, Query()], db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user), now: datetime = Depends(utc_now)):
     posts = db.query(models.Post)
     
     if posts_query.topic is not None:
@@ -54,9 +55,9 @@ def get_posts(posts_query: Annotated[schemas.PostQuery, Query()], db: Session = 
         
     if posts_query.status is not None:
         if posts_query.status == schemas.PostStatus.Live:
-            posts = posts.filter(datetime.now(timezone.utc) < models.Post.expires_at)
+            posts = posts.filter(now < models.Post.expires_at)
         else:
-            posts = posts.filter(datetime.now(timezone.utc) >= models.Post.expires_at)
+            posts = posts.filter(now >= models.Post.expires_at)
             
     return posts.all()
 
@@ -70,7 +71,7 @@ def get_post(post_id: int, db: Session = Depends(get_db), current_user: models.U
     return post
 
 @router.put("/{post_id}/reaction", response_model=schemas.PostResponse, status_code=200)
-def react_to_post(post_id: int, reaction: schemas.PostReaction, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
+def react_to_post(post_id: int, reaction: schemas.PostReaction, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user), now: datetime = Depends(utc_now)):
     post = (db.query(models.Post)
         .filter(models.Post.id == post_id)
         .first()
@@ -79,7 +80,7 @@ def react_to_post(post_id: int, reaction: schemas.PostReaction, db: Session = De
     if post is None:
         raise HTTPException(status_code=404, detail="Post not found")
     
-    if not is_post_live(datetime.now(timezone.utc).replace(tzinfo=None), post.expires_at):
+    if not is_post_live(now, post.expires_at):
         raise HTTPException(status_code=403, detail="You cannot react to an expired post")
 
     if user_is_author(post.user_id, current_user.id):
@@ -112,7 +113,7 @@ def react_to_post(post_id: int, reaction: schemas.PostReaction, db: Session = De
     return post
 
 @router.post("/{post_id}/comments", response_model=schemas.CommentResponse, status_code=201)
-def create_comment(post_id: int, comment: schemas.CommentCreate, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
+def create_comment(post_id: int, comment: schemas.CommentCreate, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user), now: datetime = Depends(utc_now)):
     post = (db.query(models.Post)
         .filter(models.Post.id == post_id)
         .first()
@@ -121,7 +122,7 @@ def create_comment(post_id: int, comment: schemas.CommentCreate, db: Session = D
     if post is None:
         raise HTTPException(status_code=404, detail="Post not found")
     
-    if not is_post_live(datetime.now(timezone.utc).replace(tzinfo=None), post.expires_at):
+    if not is_post_live(now, post.expires_at):
         raise HTTPException(status_code=403, detail="You cannot react to an expired post")
     
     new_comment = models.Comment(

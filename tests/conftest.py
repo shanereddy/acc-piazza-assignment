@@ -10,6 +10,7 @@ from sqlalchemy.orm import sessionmaker
 
 from application import create_app
 from database import get_db
+from clock import utc_now
 
 USERS =  {
     "Olga": 
@@ -21,13 +22,32 @@ USERS =  {
     "Nestor": 
     {"username": "Nestor", "email": "nestor@example.com", "password": "nestorsecret123"},
 }
-expires_at = (datetime.now() + timedelta(10))
+expires_at = (datetime.now() + timedelta(minutes=10))
 POST = {"title": "New Title for Post", "body": "This is a body of a post.", "topics": ["Tech"], "expires_at": expires_at.isoformat()}
 HEALTH_POST = {"title": "New Title for a Health Post", "body": "This is a body of a health post.", "topics": ["Health"], "expires_at": expires_at.isoformat()}
 COMMENT = {"body": "This is a comment from a user"}
 
+# A FakeClock class allows us to set the current datetime(behaves like the production app)
+class FakeClock:
+    def __init__(self, now: datetime):
+        self.now = now
+    
+    # mimics the production method but returns the datetime we have set
+    def utc_now(self) -> datetime:
+        return self.now
+    
+    # The change_now function allows us to set the current datetime to any test value we want
+    def change_now(self, new: datetime):
+        self.now = new
+
+# We use a fixture so that we can use it in individual tests to set the current datetime with change_now()
 @pytest.fixture
-def client(tmp_path):
+def fake_clock():
+    return FakeClock(utc_now())
+    
+
+@pytest.fixture
+def client(tmp_path, fake_clock):
     engine = create_engine(
         f"sqlite:///{tmp_path / 'piazza-test.db'}",
         connect_args={"check_same_thread": False},
@@ -40,6 +60,7 @@ def client(tmp_path):
             yield session
 
     app.dependency_overrides[get_db] = override_db
+    app.dependency_overrides[utc_now] = lambda: fake_clock.utc_now()
     try:
         with TestClient(app) as test_client:
             yield test_client
@@ -137,9 +158,19 @@ def post_comments(client, post_dislikes):
 
 # Nestor creates a Health post
 @pytest.fixture
-def all_seeded_posts(client, post_comments):
+def seeded_posts_plus_health(client, post_comments):
     client.headers["Authorization"] = f"Bearer {post_comments["Nestor"]["token"]}"
     response = client.post("/posts", json=HEALTH_POST)
     assert response.status_code == 201
     post_comments["Nestor"]["health_post_id"] = response.json()["id"]
     return post_comments
+
+# Mary comments on Nestor’s live Health post
+@pytest.fixture
+def all_seeded_posts(client, seeded_posts_plus_health):
+    nestors_health_post_id = seeded_posts_plus_health["Nestor"]["health_post_id"]
+    client.headers["Authorization"] = f"Bearer {seeded_posts_plus_health["Mary"]["token"]}"
+    response = client.post(f"/posts/{nestors_health_post_id}/comments", json=COMMENT)
+    assert response.status_code == 201
+    
+    return seeded_posts_plus_health
