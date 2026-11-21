@@ -167,6 +167,28 @@ def test_reaction_on_expired_post_TC17(client, fake_clock, all_seeded_posts):
     response = client.put(f"/posts/{nestors_health_post_id}/reaction", json={"value": "like"})
     assert response.status_code == 403
     assert client.get(f"/posts/{nestors_health_post_id}").json()["likes"] == 0
+    
+# TC18
+def test_expired_post_readable_TC18(client, fake_clock, all_seeded_posts):
+    nestors_health_post_id = all_seeded_posts["Nestor"]["health_post_id"]
+    client.headers["Authorization"] = f"Bearer {all_seeded_posts["Mary"]["token"]}"
+    
+    fake_clock.change_now(fake_clock.now + timedelta(minutes=20))
+    response = client.get(f"/posts/{nestors_health_post_id}")
+    assert response.status_code == 200
+    assert len(response.json()["comments"]) == 1
+    
+# TC19
+def test_expired_post_browsing_TC19(client, fake_clock, all_seeded_posts):
+    nestors_health_post_id = all_seeded_posts["Nestor"]["health_post_id"]
+    client.headers["Authorization"] = f"Bearer {all_seeded_posts["Mary"]["token"]}"
+    
+    fake_clock.change_now(fake_clock.now + timedelta(minutes=20))
+    response = client.get("/posts?topic=Sport&status=Expired")
+    assert response.status_code == 200
+    assert len(response.json()) == 0
+
+
 
 # def test_route_authenticated(auth_client):
 #     create_post = auth_client.post("/posts", json=POST)
