@@ -21,6 +21,10 @@ USERS =  {
     "Nestor": 
     {"username": "Nestor", "email": "nestor@example.com", "password": "nestorsecret123"},
 }
+expires_at = (datetime.now() + timedelta(10))
+POST = {"title": "New Title for Post", "body": "This is a body of a post.", "topics": ["Tech"], "expires_at": expires_at.isoformat()}
+HEALTH_POST = {"title": "New Title for a Health Post", "body": "This is a body of a health post.", "topics": ["Health"], "expires_at": expires_at.isoformat()}
+COMMENT = {"body": "This is a comment from a user"}
 
 @pytest.fixture
 def client(tmp_path):
@@ -64,10 +68,9 @@ def auth_users(client):
     
     return auth_users
 
+# 3 Tech posts
 @pytest.fixture
 def user_posts(client, auth_users):
-    expires_at = (datetime.now() + timedelta(10))
-    POST = {"title": "New Title for Post", "body": "This is a body of a post.", "topics": ["Tech"], "expires_at": expires_at.isoformat()}
     
     client.headers["Authorization"] = f"Bearer {auth_users["Olga"]["token"]}"
     auth_users["Olga"]["post_id"] = client.post("/posts", json=POST).json()["id"]
@@ -80,6 +83,7 @@ def user_posts(client, auth_users):
     
     return auth_users
 
+# Nick and Olga like Mary’s post
 @pytest.fixture
 def post_likes(client, user_posts):
     mary_post_id = user_posts["Mary"]["post_id"]
@@ -97,6 +101,7 @@ def post_likes(client, user_posts):
     
     return user_posts
 
+# Nestor likes Nick’s post and dislikes Mary’s post
 @pytest.fixture
 def post_dislikes(client, post_likes):
     nicks_post_id = post_likes["Nick"]["post_id"]
@@ -111,9 +116,9 @@ def post_dislikes(client, post_likes):
     
     return post_likes
 
+# Nick and Olga each add at least two comments to Mary’s post
 @pytest.fixture
 def post_comments(client, post_dislikes):
-    COMMENT = {"body": "This is a comment from a user"}
     mary_post_id = post_dislikes["Mary"]["post_id"]
     
     client.headers["Authorization"] = f"Bearer {post_dislikes["Nick"]["token"]}"
@@ -130,19 +135,11 @@ def post_comments(client, post_dislikes):
     
     return post_dislikes
 
+# Nestor creates a Health post
 @pytest.fixture
-def auth_user_posts_with_likes(client, auth_user_posts):
-    nicks_post_id = auth_user_posts["Nick"]["post_id"]
-    mary_post_id = auth_user_posts["Mary"]["post_id"]
-    # Nick and Olga like Mary's post
-    client.headers["Authorization"] = f"Bearer {auth_user_posts["Nick"]["token"]}"
-    client.put(f"/posts/{mary_post_id}/reaction", json={"value": "like"})
-    client.headers["Authorization"] = f"Bearer {auth_user_posts["Olga"]["token"]}"
-    client.put(f"/posts/{mary_post_id}/reaction", json={"value": "like"})
-    
-    # Nestor likes Nick's post and dislikes Mary's post
-    client.headers["Authorization"] = f"Bearer {auth_user_posts["Nestor"]["token"]}"
-    client.put(f"/posts/{nicks_post_id}/reaction", json={"value": "like"})
-    client.put(f"/posts/{mary_post_id}/reaction", json={"value": "dislike"})
-    
-    return auth_user_posts
+def all_seeded_posts(client, post_comments):
+    client.headers["Authorization"] = f"Bearer {post_comments["Nestor"]["token"]}"
+    response = client.post("/posts", json=HEALTH_POST)
+    assert response.status_code == 201
+    post_comments["Nestor"]["health_post_id"] = response.json()["id"]
+    return post_comments
