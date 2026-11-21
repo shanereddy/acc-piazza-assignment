@@ -78,6 +78,9 @@ def react_to_post(post_id: int, reaction: schemas.PostReaction, db: Session = De
     
     if post is None:
         raise HTTPException(status_code=404, detail="Post not found")
+    
+    if not is_post_live(datetime.now(timezone.utc).replace(tzinfo=None), post.expires_at):
+        raise HTTPException(status_code=403, detail="You cannot react to an expired post")
 
     if user_is_author(post.user_id, current_user.id):
         raise HTTPException(status_code=403, detail="You cannot react to your own post")
@@ -117,6 +120,9 @@ def create_comment(post_id: int, comment: schemas.CommentCreate, db: Session = D
     
     if post is None:
         raise HTTPException(status_code=404, detail="Post not found")
+    
+    if not is_post_live(datetime.now(timezone.utc).replace(tzinfo=None), post.expires_at):
+        raise HTTPException(status_code=403, detail="You cannot react to an expired post")
     
     new_comment = models.Comment(
         post_id= post_id,
