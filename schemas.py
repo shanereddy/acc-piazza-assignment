@@ -1,4 +1,4 @@
-from pydantic import BaseModel, ConfigDict, EmailStr, Field, FutureDatetime, computed_field
+from pydantic import BaseModel, ConfigDict, EmailStr, Field, FutureDatetime, computed_field, model_serializer
 from typing import Literal
 from datetime import datetime, timezone
 from enum import StrEnum
@@ -53,6 +53,10 @@ class Topic(BaseModel):
     name: str
     
     model_config = ConfigDict(from_attributes=True)
+    
+    @model_serializer
+    def topic_name_to_str(self) -> str:
+        return self.name
 
 class PostResponse(BaseModel):
     id: int

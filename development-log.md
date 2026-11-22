@@ -98,10 +98,12 @@ Sources:
 I made the production code rely on an imported `utc_now()` function that returned the current UTC datetime. Then used dependency injection to inject a `FakeClock` class that has a change_now function to change the current time.
 - I had to learn Python class creation syntax
 - I eventualy had to use AI to debug it as my function calls were not written properly. This was a monir fix and it worked after that.
+- Used model serializers to deserialize my topic model from `Topic.name` to a `str` so that I can return a `list` of topics instead of a `dict`.
 
 Sources:
 - [Python OOP](https://www.w3schools.com/python/python_oop.asp)
 - [Testing Dependencies](https://fastapi.tiangolo.com/advanced/testing-dependencies/#use-the-app-dependency-overrides-attribute)
+- [Model Serializers](https://pydantic.dev/docs/validation/dev/concepts/serialization/#model-serializers)
 
 ## TODO
 - [ ] Update packages to latest version
