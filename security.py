@@ -10,7 +10,7 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jwt.exceptions import InvalidTokenError
 from sqlalchemy.orm import Session
 
-import models
+from models import User
 from database import get_db
 
 bearer_scheme = HTTPBearer(auto_error=False)
@@ -72,7 +72,7 @@ def get_current_user(
         raise HTTPException(status_code=401, detail="Invalid token")
 
     # Find the user represented by the token.
-    user = db.query(models.User).filter(models.User.email == email).first()
+    user = db.query(User).filter(User.email == email).first()
 
     if user is None:
         raise HTTPException(status_code=401, detail="User not found")

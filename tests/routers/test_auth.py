@@ -46,6 +46,14 @@ def test_reject_token(client, kind):
     headers = {} if kind == "missing" else {"Authorization": f"Bearer {token}"}
     assert client.get("/posts", headers=headers).status_code == 401
     
+@pytest.mark.parametrize("time_delta, response_code", [(-1, 401), (0, 401), (1, 200)])
+def test_token_expiration_boundary(client, time_delta, response_code):
+    client.post("/auth/register", json=USER)
+    payload = {"sub": USER["email"], "exp": datetime.now(timezone.utc) + timedelta(minutes=time_delta)}
+    token = jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
+    headers = {"Authorization": f"Bearer {token}"}
+    assert client.get("/posts", headers=headers).status_code == response_code
+    
 # TC01
 @pytest.mark.parametrize("user", [USERS["Olga"], USERS["Nick"], USERS["Mary"], USERS["Nestor"]])
 def test_register_successfully_TC01(client, user):

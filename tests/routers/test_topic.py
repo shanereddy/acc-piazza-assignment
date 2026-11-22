@@ -1,5 +1,9 @@
 import pytest
 
+def test_route_unauthenticated(client):
+    response = client.get("/topics/Tech/most-active")
+    assert response.status_code == 401
+
 # TC20
 def test_most_active_post_TC20(client, all_seeded_posts):
     mary_post_id = all_seeded_posts["Mary"]["post_id"]
