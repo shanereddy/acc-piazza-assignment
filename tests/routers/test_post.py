@@ -188,8 +188,6 @@ def test_expired_post_browsing_TC19(client, fake_clock, all_seeded_posts):
     assert response.status_code == 200
     assert len(response.json()) == 0
 
-
-
 # def test_route_authenticated(auth_client):
 #     create_post = auth_client.post("/posts", json=POST)
 #     print(create_post.json())
