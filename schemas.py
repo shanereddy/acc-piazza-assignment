@@ -1,6 +1,5 @@
 from pydantic import BaseModel, ConfigDict, EmailStr, Field, FutureDatetime, computed_field, model_serializer
-from typing import Literal
-from datetime import datetime, timezone
+from datetime import datetime
 from enum import StrEnum
 from rules import is_post_live
 
@@ -49,6 +48,7 @@ class PostCreate(BaseModel):
     topics: set[ValidTopics] = Field(min_length=1)
     expires_at: FutureDatetime
     
+    model_config = ConfigDict(str_strip_whitespace=True)
 class Topic(BaseModel):
     name: str
     
@@ -88,7 +88,8 @@ class PostReaction(BaseModel):
     value: PostReaction
     
 class CommentCreate(BaseModel):
-    body: str = Field(json_schema_extra={"strip_whitespace": True})
+    body: str = Field(min_length=1)
+    model_config = ConfigDict(str_strip_whitespace=True)
     
 class CommentResponse(BaseModel):
     id: int

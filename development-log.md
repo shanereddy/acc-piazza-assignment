@@ -105,6 +105,12 @@ Sources:
 - [Testing Dependencies](https://fastapi.tiangolo.com/advanced/testing-dependencies/#use-the-app-dependency-overrides-attribute)
 - [Model Serializers](https://pydantic.dev/docs/validation/dev/concepts/serialization/#model-serializers)
 
+### 23/11/2026
+- Strip all whitespace from fields with model_config in schemas. Used for `PostCreate` and `CommentCreate`.
+
+Sources:
+- [pydantic.config](https://pydantic.dev/docs/validation/latest/api/pydantic/config/#pydantic.config.ConfigDict.str_strip_whitespace)
+
 ## TODO
 - [ ] Update packages to latest version
 - [ ] Update README with tech stack
