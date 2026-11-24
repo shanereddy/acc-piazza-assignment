@@ -42,8 +42,8 @@ class TokenResponse(BaseModel):
     
 # Post
 class PostCreate(BaseModel):
-    title: str = Field(max_length=30, json_schema_extra={"strip_whitespace": True})
-    body: str = Field(json_schema_extra={"strip_whitespace": True})
+    title: str = Field(min_length=1, max_length=30)
+    body: str = Field(min_length=1)
     # Check against our topics and always require at least 1 topic
     topics: set[ValidTopics] = Field(min_length=1)
     expires_at: FutureDatetime

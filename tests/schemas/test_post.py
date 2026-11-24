@@ -1,9 +1,9 @@
 import pytest
 
-from datetime import timedelta
+from datetime import datetime, timezone, timedelta
 from pydantic import ValidationError
 
-from schemas import ValidTopics, PostCreate
+from schemas import PostCreate, PostQuery, PostReaction
 from clock import utc_now
 
 POST = {
@@ -26,35 +26,88 @@ def test_strip_whitespace():
     assert post.title == POST["title"]
     assert post.body == POST["body"]
     
+
+@pytest.mark.parametrize("title, is_exception_raised", [
+    (" ", True), 
+    ("", True), 
+    ("a" * 31, True), 
+    ("a" * 1, False), 
+    ("a" * 30, False)
+])
+def test_title_length_boundaries(title, is_exception_raised):
+    if is_exception_raised:
+        with pytest.raises(ValidationError):
+            PostCreate(title=title, body=POST["body"], topics=POST["topics"], expires_at=POST["expires_at"])
+    else:
+        assert PostCreate(title=title, body=POST["body"], topics=POST["topics"], expires_at=POST["expires_at"])
+        
+@pytest.mark.parametrize("body, is_exception_raised", [
+    (" ", True), 
+    ("", True), 
+    ("a" * 1, False)
+])
+def test_body_length_boundaries(body, is_exception_raised):
+    if is_exception_raised:
+        with pytest.raises(ValidationError):
+            PostCreate(title=POST["title"], body=body, topics=POST["topics"], expires_at=POST["expires_at"])
+    else:
+        assert PostCreate(title=POST["title"], body=body, topics=POST["topics"], expires_at=POST["expires_at"])
     
+@pytest.mark.parametrize("topics, is_exception_raised", [
+    (["Politics", "Health", "Sport", "Tech"], False),
+    (["Politics", "Health", "Sport", "TechAndSport"], True),
+    ([""], True),
+    (["NotATopic"], True)
+])
+def test_valid_topics_boundaries(topics, is_exception_raised):
+    if is_exception_raised:
+        with pytest.raises(ValidationError):
+            PostCreate(title=POST["title"], body=POST["body"], topics=topics, expires_at=POST["expires_at"])
+    else:
+        assert PostCreate(title=POST["title"], body=POST["body"], topics=topics, expires_at=POST["expires_at"])
+        
+@pytest.mark.parametrize("expires_at, is_exception_raised", [
+    (datetime.now(timezone.utc).replace(tzinfo=None) - timedelta(seconds=1), True), 
+    (datetime.now(timezone.utc).replace(tzinfo=None), True), 
+    (datetime.now(timezone.utc).replace(tzinfo=None) + timedelta(seconds=1), False) 
+])
+def test_expires_at_boundaries(expires_at, is_exception_raised):
+    if is_exception_raised:
+        with pytest.raises(ValidationError):
+            PostCreate(title=POST["title"], body=POST["body"], topics=POST["topics"], expires_at=expires_at)
+    else:
+        assert PostCreate(title=POST["title"], body=POST["body"], topics=POST["topics"], expires_at=expires_at)
+
+# PostQuery
+@pytest.mark.parametrize("topic, status", [
+    ("Health", "Live"),
+    ("Sport", "Expired"),
+    (None, "Expired"),
+    ("Sport", None),
+    (None, None)
+])
+def test_valid_post_query(topic, status):
+    post_query = PostQuery(topic=topic, status=status)
+    assert post_query.topic == topic
+    assert post_query.status == status
     
-# def test_invalid_email_user_create():
-#     with pytest.raises(ValidationError):
-#         UserCreate(username=USER["username"], email="shaneatexample.com", password=USER["password"])
-
-# def test_no_username():
-#     with pytest.raises(ValidationError):
-#         UserCreate(email=USER["email"], password=USER["password"])
-
-# @pytest.mark.parametrize("username", [("ab"), ("a" * 51)])
-# def test_username_length_boundary_failure(username):
-#     with pytest.raises(ValidationError):
-#         UserCreate(username=username, email=USER["email"], password=USER["password"])
+@pytest.mark.parametrize("topic, status", [
+    ("HealthAndSport", "Alive"),
+    ("", ""),
+    (None, "Expiring"),
+    ("Technical", None)
+])
+def test_invalid_post_query(topic, status):
+    with pytest.raises(ValidationError):
+        PostQuery(topic=topic, status=status)
+        
+# PostReaction
+@pytest.mark.parametrize("reaction", ["like", "dislike"])
+def test_valid_post_reaction(reaction):
+    post_reaction = PostReaction(value=reaction)
+    assert post_reaction.value == reaction
     
-# @pytest.mark.parametrize("username", [("a" * 3), ("a" * 50)])
-# def test_username_length_boundary_success(username):
-#     user = UserCreate(username=username, email=USER["email"], password=USER["password"])
-#     assert user.username == username
-
-# def test_invalid_short_password():
-#     with pytest.raises(ValidationError):
-#         UserCreate(username=USER["username"], email=USER["email"], password="b" * 5)
-
-# # UserLogin
-# def test_valid_email_user_login():
-#     user = UserLogin(email=USER["email"], password=USER["password"])
-#     assert user.email == USER["email"]
-
-# def test_invalid_email_user_login():
-#     with pytest.raises(ValidationError):
-#         UserLogin(email="shaneatexample.com", password=USER["password"])
+@pytest.mark.parametrize("reaction", ["", None, "love"])
+def test_invalid_post_reaction(reaction):
+    with pytest.raises(ValidationError):
+        PostReaction(value=reaction)
