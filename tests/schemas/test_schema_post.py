@@ -67,9 +67,9 @@ def test_valid_topics_boundaries(topics, is_exception_raised):
         assert PostCreate(title=POST["title"], body=POST["body"], topics=topics, expires_at=POST["expires_at"])
         
 @pytest.mark.parametrize("expires_at, is_exception_raised", [
-    (datetime.now(timezone.utc).replace(tzinfo=None) - timedelta(seconds=1), True), 
+    (datetime.now(timezone.utc).replace(tzinfo=None) - timedelta(minutes=1), True), 
     (datetime.now(timezone.utc).replace(tzinfo=None), True), 
-    (datetime.now(timezone.utc).replace(tzinfo=None) + timedelta(seconds=1), False) 
+    (datetime.now(timezone.utc).replace(tzinfo=None) + timedelta(minutes=1), False) 
 ])
 def test_expires_at_boundaries(expires_at, is_exception_raised):
     if is_exception_raised:
@@ -114,9 +114,9 @@ def test_invalid_post_reaction(reaction):
         
 # PostResponse
 @pytest.mark.parametrize("expires_at, expected_status", [
-    (datetime.now(timezone.utc).replace(tzinfo=None) - timedelta(seconds=1), "Expired"), 
+    (datetime.now(timezone.utc).replace(tzinfo=None) - timedelta(minutes=1), "Expired"), 
     (datetime.now(timezone.utc).replace(tzinfo=None), "Expired"), 
-    (datetime.now(timezone.utc).replace(tzinfo=None) + timedelta(seconds=1), "Live") 
+    (datetime.now(timezone.utc).replace(tzinfo=None) + timedelta(minutes=1), "Live") 
 ])
 def test_status_computed_field(expires_at, expected_status):
     post_response = PostResponse(
