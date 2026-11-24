@@ -3,6 +3,7 @@ from datetime import datetime
 from enum import StrEnum
 from rules import is_post_live
 
+# Types
 class ValidTopics(StrEnum):
     Politics = "Politics"
     Health = "Health"
@@ -17,6 +18,7 @@ class PostReaction(StrEnum):
     like = "like"
     dislike = "dislike"
 
+# Schemas
 # User
 class UserCreate(BaseModel):
     username: str = Field(min_length=3, max_length=50)

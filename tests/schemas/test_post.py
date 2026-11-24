@@ -3,7 +3,7 @@ import pytest
 from datetime import datetime, timezone, timedelta
 from pydantic import ValidationError
 
-from schemas import PostCreate, PostQuery, PostReaction
+from schemas import PostCreate, PostQuery, PostReaction, PostResponse
 from clock import utc_now
 
 POST = {
@@ -111,3 +111,23 @@ def test_valid_post_reaction(reaction):
 def test_invalid_post_reaction(reaction):
     with pytest.raises(ValidationError):
         PostReaction(value=reaction)
+        
+# PostResponse
+@pytest.mark.parametrize("expires_at, expected_status", [
+    (datetime.now(timezone.utc).replace(tzinfo=None) - timedelta(seconds=1), "Expired"), 
+    (datetime.now(timezone.utc).replace(tzinfo=None), "Expired"), 
+    (datetime.now(timezone.utc).replace(tzinfo=None) + timedelta(seconds=1), "Live") 
+])
+def test_status_computed_field(expires_at, expected_status):
+    post_response = PostResponse(
+        id=1, 
+        title=POST["title"], 
+        body=POST["body"], 
+        topics=[{"name": POST["topics"][0]}],
+        expires_at=expires_at,
+        likes=0,
+        dislikes=0,
+        comments=[],
+        user_id=3
+    )
+    assert post_response.status == expected_status
