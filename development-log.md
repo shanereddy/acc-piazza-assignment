@@ -111,6 +111,12 @@ Sources:
 Sources:
 - [pydantic.config](https://pydantic.dev/docs/validation/latest/api/pydantic/config/#pydantic.config.ConfigDict.str_strip_whitespace)
 
+### 25/11/2026
+- Added cascade delete to parent tables and indexes to foreign keys.
+
+Sources:
+- [Cascades](https://docs.sqlalchemy.org/en/21/orm/cascades.html#cascades)
+
 ## TODO
 - [ ] Update packages to latest version
 - [ ] Update README with tech stack

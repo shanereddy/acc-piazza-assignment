@@ -18,8 +18,9 @@ class User(Base):
     hashed_password: Mapped[str] = mapped_column(String, nullable=False)
     active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
     
-    posts: Mapped[List["Post"]] = relationship(back_populates="user")
-    comments: Mapped[List["Comment"]] = relationship(back_populates="user")
+    posts: Mapped[List["Post"]] = relationship(back_populates="user", cascade="all, delete-orphan")
+    comments: Mapped[List["Comment"]] = relationship(back_populates="user", cascade="all, delete-orphan")
+    reactions: Mapped[List["UserPostReaction"]] = relationship(back_populates="user", cascade="all, delete-orphan")
 
 # Association table for the many-to-many relationship between posts and topics
 post_topics = Table(
@@ -35,9 +36,14 @@ class UserPostReaction(Base):
     __table_args__ = (UniqueConstraint("user_id", "post_id"),)
     
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
-    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
-    post_id: Mapped[int] = mapped_column(ForeignKey("posts.id"), index=True)
     reaction: Mapped[str] = mapped_column(String, nullable=False)
+    
+    post_id: Mapped[int] = mapped_column(ForeignKey("posts.id", ondelete="CASCADE"), index=True)
+    user: Mapped["Post"] = relationship(back_populates="posts")
+    
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    user: Mapped["User"] = relationship(back_populates="reactions")
+    
     
 class Post(Base):
     __tablename__ = "posts"
@@ -72,14 +78,13 @@ class Post(Base):
     )
     
     # A post belongs to a user
-    # user: Mapped["User"] = relationship(back_populates="posts")
-    user: Mapped["User"] = relationship()
-    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    user: Mapped["User"] = relationship(back_populates="posts")
     
     # has many
-    comments: Mapped[List["Comment"]] = relationship(back_populates="post")
+    comments: Mapped[List["Comment"]] = relationship(back_populates="post", cascade="all, delete-orphan")
     topics: Mapped[List["Topic"]] = relationship(secondary="post_topics", back_populates="posts")
-    reactions: Mapped[List["UserPostReaction"]] = relationship()
+    reactions: Mapped[List["UserPostReaction"]] = relationship(cascade="all, delete-orphan")
     
 class Topic(Base):
     __tablename__ = "topics"
@@ -97,8 +102,8 @@ class Comment(Base):
     body: Mapped[str] = mapped_column(Text, nullable=False)
     
     # A comment belongs to a user and a post
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
     user: Mapped["User"] = relationship(back_populates="comments")
-    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
     
+    post_id: Mapped[int] = mapped_column(ForeignKey("posts.id", ondelete="CASCADE"), index=True)
     post: Mapped["Post"] = relationship(back_populates="comments")
-    post_id: Mapped[int] = mapped_column(ForeignKey("posts.id"))

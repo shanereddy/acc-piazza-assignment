@@ -16,16 +16,7 @@ router = APIRouter()
 
 @router.post("/", response_model=schemas.PostResponse, status_code=201)
 def create_post(post: schemas.PostCreate, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
-    # Create new post
-    new_post = models.Post(
-        title=post.title,
-        body=post.body,
-        expires_at=post.expires_at
-    )
-    
-    # Set the author of the post
-    new_post.user = current_user
-    
+    topics_to_add = []
     for topic in post.topics:
         existing_topic = (db.query(models.Topic)
             .filter(models.Topic.name == topic)
@@ -35,8 +26,17 @@ def create_post(post: schemas.PostCreate, db: Session = Depends(get_db), current
         if existing_topic is None:
             raise HTTPException(status_code=409, detail="Existing topic not found")
         
-        new_post.topics.append(existing_topic)
-
+        topics_to_add.append(existing_topic)
+        
+    # Create new post
+    new_post = models.Post(
+        title=post.title,
+        body=post.body,
+        expires_at=post.expires_at,
+        user=current_user,
+        topics=topics_to_add
+    )
+    
     db.add(new_post)
     try:
         db.commit()
